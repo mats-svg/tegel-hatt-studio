@@ -18,7 +18,7 @@
 
     header {
       background: #fff;
-      padding: 24px 40px;
+      padding: 32px 48px;
       border-bottom: 1px solid #e8e8e8;
       display: flex;
       justify-content: space-between;
@@ -58,9 +58,9 @@
     .btn-radera:hover { border-color: #fd804b; color: #fd804b; }
 
     main {
-      max-width: 1100px;
-      margin: 40px auto;
-      padding: 0 40px 80px;
+      max-width: 1200px;
+      margin: 48px auto;
+      padding: 0 48px 80px;
     }
 
     /* Modaler */
@@ -76,6 +76,11 @@
     }
     .modal-bakgrund.visas { display: flex; }
 
+    @keyframes modalInn {
+      from { opacity: 0; transform: translateY(16px) scale(0.98); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
     .modal {
       background: #fff;
       border-radius: 12px;
@@ -84,6 +89,7 @@
       max-width: 520px;
       max-height: 90vh;
       overflow-y: auto;
+      animation: modalInn 0.25s ease both;
     }
     .modal-bred { max-width: 720px; }
     .modal h2 { font-size: 2rem; font-weight: 400; margin-bottom: 24px; color: #000; font-family: 'Bodoni 72', 'Bodoni72', 'Didot', Georgia, serif; }
@@ -221,25 +227,38 @@
       font-size: 0.85rem;
       font-weight: 600;
       color: #888;
-      padding: 12px 16px;
+      padding: 16px 20px;
       border-bottom: 1px solid #e8e8e8;
       background: #fff;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
     }
-    .kolumn-inner { padding: 16px; }
+    .kolumn-inner { padding: 20px; }
+
+    @keyframes kortInn {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
 
     .kort {
       background: #fff;
       border: 1px solid #e8e8e8;
       border-radius: 10px;
-      padding: 16px;
-      margin-bottom: 10px;
+      padding: 20px;
+      margin-bottom: 12px;
+      transition: box-shadow 0.2s, transform 0.2s;
+      animation: kortInn 0.35s ease both;
     }
-    .kort-kund { font-size: 0.82rem; color: #999; margin-bottom: 3px; }
-    .kort-namn { font-size: 1.35rem; font-weight: 400; margin-bottom: 6px; color: #000; font-family: 'Bodoni 72', 'Bodoni72', 'Didot', Georgia, serif; }
-    .kort-belopp { font-size: 1.05rem; font-weight: 500; color: #000; margin-bottom: 8px; }
-    .kort-innehall { font-size: 0.88rem; color: #555; margin-bottom: 12px; line-height: 1.55; }
-    .kort-knappar { display: flex; gap: 8px; flex-wrap: wrap; }
-    .tom-text { font-size: 0.85rem; color: #bbb; padding: 16px; }
+    .kort:hover {
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      transform: translateY(-2px);
+    }
+    .kort-kund { font-size: 0.82rem; color: #999; margin-bottom: 4px; }
+    .kort-namn { font-size: 1.35rem; font-weight: 400; margin-bottom: 8px; color: #000; font-family: 'Bodoni 72', 'Bodoni72', 'Didot', Georgia, serif; }
+    .kort-belopp { font-size: 1.05rem; font-weight: 500; color: #000; margin-bottom: 10px; }
+    .kort-innehall { font-size: 0.88rem; color: #555; margin-bottom: 14px; line-height: 1.6; }
+    .kort-knappar { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+    .tom-text { font-size: 0.85rem; color: #bbb; padding: 20px; }
   </style>
 </head>
 <body>
@@ -468,6 +487,7 @@
       const el = document.getElementById(`kolumn-${status}`);
       if (lista.length === 0) { el.innerHTML = '<div class="tom-text">Inga projekt här ännu.</div>'; return; }
       el.innerHTML = lista.map(p => kortHTML(p)).join('');
+      el.querySelectorAll('.kort').forEach((k, i) => { k.style.animationDelay = `${i * 60}ms`; });
     });
   }
 
