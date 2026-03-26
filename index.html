@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tegel och Hatt — Idéformulär</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500&display=swap');
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #f5f0e8;
+      color: #3b2f2f;
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+    }
+
+    header {
+      background-color: #e8dcc8;
+      padding: 48px 24px 40px;
+      text-align: center;
+      border-bottom: 1px solid #d4c4a8;
+    }
+
+    header h1 {
+      font-family: 'Lora', serif;
+      font-size: 2.2rem;
+      color: #3b2f2f;
+      margin-bottom: 12px;
+    }
+
+    header p {
+      font-size: 1.05rem;
+      color: #6b5045;
+      max-width: 540px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    main {
+      max-width: 680px;
+      margin: 48px auto;
+      padding: 0 24px 80px;
+    }
+
+    .fraga {
+      margin-bottom: 36px;
+    }
+
+    label {
+      display: block;
+      font-family: 'Lora', serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #3b2f2f;
+      margin-bottom: 10px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 14px 16px;
+      border: 1.5px solid #c9b89a;
+      border-radius: 8px;
+      background-color: #fdf8f0;
+      color: #3b2f2f;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.97rem;
+      line-height: 1.6;
+      resize: vertical;
+      transition: border-color 0.2s;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: #9c7a5a;
+    }
+
+    textarea::placeholder {
+      color: #b09a80;
+    }
+
+    button {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      background-color: #9c7a5a;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Lora', serif;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      margin-top: 8px;
+    }
+
+    button:hover {
+      background-color: #7a5c3e;
+    }
+
+    #bekraftelse {
+      display: none;
+      text-align: center;
+      padding: 32px;
+      background: #e8dcc8;
+      border-radius: 12px;
+      margin-top: 24px;
+    }
+
+    #bekraftelse h2 {
+      font-family: 'Lora', serif;
+      font-size: 1.4rem;
+      margin-bottom: 8px;
+    }
+
+    #bekraftelse p {
+      color: #6b5045;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Vad behöver du egentligen?</h1>
+    <p>Svara på frågorna nedan. Det finns inga rätt eller fel — skriv det som kommer upp. Det tar ungefär fem minuter.</p>
+  </header>
+
+  <main>
+    <form id="formular">
+
+      <div class="fraga">
+        <label>Vad lägger du mest tid på i jobbet som du önskar gick snabbare?</label>
+        <textarea name="tid_pa" placeholder="T.ex. möten, mejl, briefar, offerter..."></textarea>
+      </div>
+
+      <div class="fraga">
+        <label>Finns det något du gör om och om igen som känns onödigt repetitivt?</label>
+        <textarea name="upprepas" placeholder="T.ex. samma typ av frågor från kunder, liknande dokument varje gång..."></textarea>
+      </div>
+
+      <div class="fraga">
+        <label>Om du hade en assistent som kunde bygga vad som helst åt dig — vad skulle du be om först?</label>
+        <textarea name="dromassistent" placeholder="Drömfritt — vad som helst är okej att skriva här."></textarea>
+      </div>
+
+      <div class="fraga">
+        <label>Vad är det jobbigaste med att hålla koll på projekt och kunder?</label>
+        <textarea name="jobbigt" placeholder="T.ex. status, deadlines, vem som ska göra vad..."></textarea>
+      </div>
+
+      <div class="fraga">
+        <label>Något annat du vill ha sagt?</label>
+        <textarea name="ovrigt" placeholder="Fritt fält — skriv vad du vill."></textarea>
+      </div>
+
+      <button type="submit">Skicka mina svar</button>
+    </form>
+
+    <div id="bekraftelse">
+      <h2>Tack, Mats!</h2>
+      <p>Dina svar är sparade. Nu tittar vi på dem tillsammans.</p>
+    </div>
+  </main>
+
+  <script>
+    const SUPABASE_URL = 'https://wehordecxgpxxjagbtuj.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndlaG9yZGVjeGdweHhqYWdidHVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MTk5MjMsImV4cCI6MjA5MDA5NTkyM30.omrBD5LvuICkdKIfhNFGv2dv1U6Wl_lJS1AE3ggWw0E';
+
+    document.getElementById('formular').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const data = {
+        tid_pa: form.tid_pa.value,
+        upprepas: form.upprepas.value,
+        dromassistent: form.dromassistent.value,
+        jobbigt: form.jobbigt.value,
+        ovrigt: form.ovrigt.value
+      };
+
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/ide_svar`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (res.ok) {
+        form.style.display = 'none';
+        document.getElementById('bekraftelse').style.display = 'block';
+      } else {
+        alert('Något gick fel. Försök igen.');
+      }
+    });
+  </script>
+
+</body>
+</html>

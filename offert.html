@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Offert — Tegel och Hatt</title>
+  <link rel="stylesheet" href="https://use.typekit.net/ekp3zqm.css" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #f5f5f5;
+      color: #000;
+      font-family: 'acumin-pro', 'Acumin Pro', Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      font-size: 16px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      min-height: 100vh;
+    }
+
+    /* Vänster: bild + varumärke */
+    .sido-panel {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      background: #000;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .sido-bild {
+      flex: 1;
+      background-image: url('https://www.tegelochhatt.se/app/uploads/2024/09/tegel-och-hatt-2023-10_1528x1080.webp');
+      background-size: cover;
+      background-position: center;
+      opacity: 0.75;
+    }
+
+    .sido-footer {
+      padding: 32px;
+      background: #000;
+    }
+
+    .sido-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .sido-logo img {
+      height: 28px;
+      filter: invert(0);
+    }
+
+    .sido-tagline {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.5);
+      line-height: 1.5;
+    }
+
+    /* Höger: offert-innehåll */
+    .offert-panel {
+      padding: 64px 56px;
+      max-width: 720px;
+    }
+
+    .offert-status-chip {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 32px;
+      background: #f0f0f0;
+      color: #888;
+    }
+    .chip-skickad { background: #e8eeff; color: #3a4a8b; }
+    .chip-godkand { background: #a5a6f6; color: #fff; }
+
+    .offert-rubrik {
+      font-family: 'Bodoni 72', 'Bodoni72', 'Didot', Georgia, serif;
+      font-weight: 400;
+      font-size: 2.8rem;
+      line-height: 1.15;
+      margin-bottom: 8px;
+      color: #000;
+    }
+
+    .offert-kund {
+      font-size: 0.9rem;
+      color: #888;
+      margin-bottom: 48px;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid #e8e8e8;
+      margin: 32px 0;
+    }
+
+    .meddelande {
+      font-size: 1rem;
+      line-height: 1.75;
+      color: #333;
+      margin-bottom: 40px;
+    }
+
+    .rader-rubrik {
+      display: grid;
+      grid-template-columns: 1fr 150px;
+      gap: 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #aaa;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #e8e8e8;
+      margin-bottom: 4px;
+    }
+
+    .rad {
+      display: grid;
+      grid-template-columns: 1fr 150px;
+      gap: 8px;
+      padding: 14px 0;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 0.95rem;
+      align-items: center;
+    }
+
+    .rad-belopp { text-align: right; color: #555; }
+
+    .totalt-rad {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 2px solid #000;
+    }
+
+    .totalt-label {
+      font-family: 'Bodoni 72', 'Bodoni72', 'Didot', Georgia, serif;
+      font-weight: 400;
+      font-size: 1.3rem;
+    }
+
+    .totalt-belopp {
+      font-family: 'Bodoni 72', 'Bodoni72', 'Didot', Georgia, serif;
+      font-weight: 400;
+      font-size: 1.8rem;
+      color: #000;
+    }
+
+    /* Dekobild */
+    .deko-bild {
+      width: 100%;
+      border-radius: 10px;
+      margin: 40px 0;
+      overflow: hidden;
+      height: 200px;
+    }
+
+    .deko-bild img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* Godkänn-sektion */
+    .godkann-sektion {
+      margin-top: 48px;
+      padding: 40px;
+      background: #f9f9f9;
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    .godkann-sektion p {
+      font-size: 0.9rem;
+      color: #888;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .btn-godkann {
+      background: #000;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 14px 48px;
+      font-family: 'acumin-pro', 'Acumin Pro', Helvetica, Arial, sans-serif;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-godkann:hover { background: #fd804b; }
+
+    .godkand-banner {
+      background: #a5a6f6;
+      border-radius: 12px;
+      padding: 32px 40px;
+      text-align: center;
+      margin-top: 48px;
+    }
+    .godkand-banner h3 {
+      font-family: 'Bodoni 72', 'Bodoni72', 'Didot', Georgia, serif;
+      font-weight: 400;
+      font-size: 1.8rem;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+    .godkand-banner p { font-size: 0.9rem; color: rgba(255,255,255,0.85); }
+
+    .laddning { text-align: center; padding: 80px 32px; color: #888; font-size: 0.9rem; }
+    .fel { text-align: center; padding: 80px 32px; color: #fd804b; }
+
+    @media (max-width: 800px) {
+      .layout { grid-template-columns: 1fr; }
+      .sido-panel { position: relative; height: 260px; }
+      .sido-bild { flex: 1; }
+      .offert-panel { padding: 40px 28px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="layout">
+  <!-- Vänster panel -->
+  <aside class="sido-panel">
+    <div class="sido-bild"></div>
+    <div class="sido-footer">
+      <div class="sido-logo">
+        <img src="https://www.tegelochhatt.se/app/themes/tegel-o-hatt//assets/images/logo_white.svg" alt="Tegel och Hatt" />
+      </div>
+      <p class="sido-tagline">Designbyrå med hjärtat<br>på rätt ställe sedan 2012.</p>
+    </div>
+  </aside>
+
+  <!-- Höger panel -->
+  <main class="offert-panel" id="offert-panel">
+    <div class="laddning">Laddar offert…</div>
+  </main>
+</div>
+
+<script>
+  const URL = 'https://wehordecxgpxxjagbtuj.supabase.co';
+  const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndlaG9yZGVjeGdweHhqYWdidHVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MTk5MjMsImV4cCI6MjA5MDA5NTkyM30.omrBD5LvuICkdKIfhNFGv2dv1U6Wl_lJS1AE3ggWw0E';
+  const headers = { 'Content-Type': 'application/json', 'apikey': KEY, 'Authorization': `Bearer ${KEY}` };
+
+  const id = new URLSearchParams(window.location.search).get('id');
+
+  async function ladda() {
+    if (!id) { visaFel('Ingen offert hittades.'); return; }
+    const res = await fetch(`${URL}/rest/v1/projekt?id=eq.${id}&select=*`, { headers });
+    const [p] = await res.json();
+    if (!p) { visaFel('Offerten kunde inte hittas.'); return; }
+    rendera(p);
+  }
+
+  function chipHTML(status) {
+    if (status === 'skickad') return '<span class="offert-status-chip chip-skickad">Offert skickad</span>';
+    if (status === 'godkand') return '<span class="offert-status-chip chip-godkand">Godkänd</span>';
+    return '<span class="offert-status-chip">Utkast</span>';
+  }
+
+  function rendera(p) {
+    const rader = p.offert_rader || [];
+    const totalt = rader.reduce((s, r) => s + (r.belopp || 0), 0);
+    const datum = new Date(p.skapad_at).toLocaleDateString('sv-SE', { year: 'numeric', month: 'long', day: 'numeric' });
+    const godkand = p.offert_status === 'godkand';
+
+    document.title = `Offert — ${p.projektnamn}`;
+
+    document.getElementById('offert-panel').innerHTML = `
+      ${chipHTML(p.offert_status)}
+
+      <h1 class="offert-rubrik">${p.projektnamn}</h1>
+      <p class="offert-kund">${p.kundnamn} &nbsp;·&nbsp; ${datum}</p>
+
+      <hr class="divider" />
+
+      ${p.offert_meddelande ? `<p class="meddelande">${p.offert_meddelande.replace(/\n/g, '<br>')}</p><hr class="divider" />` : ''}
+
+      <div class="rader-rubrik">
+        <span>Beskrivning</span>
+        <span style="text-align:right">Belopp</span>
+      </div>
+      ${rader.map(r => `
+        <div class="rad">
+          <span>${r.beskrivning}</span>
+          <span class="rad-belopp">${new Intl.NumberFormat('sv-SE').format(r.belopp)} kr</span>
+        </div>
+      `).join('')}
+
+      <div class="totalt-rad">
+        <span class="totalt-label">Totalt</span>
+        <span class="totalt-belopp">${new Intl.NumberFormat('sv-SE').format(totalt)} kr</span>
+      </div>
+
+      <div class="deko-bild">
+        <img src="https://www.tegelochhatt.se/app/uploads/2024/11/mm-book-bk-c-03-2-1.webp" alt="" />
+      </div>
+
+      ${godkand
+        ? `<div class="godkand-banner">
+            <h3>Offerten är godkänd</h3>
+            <p>Tack! Vi hör av oss för att komma igång.</p>
+          </div>`
+        : `<div class="godkann-sektion">
+            <p>Godkänn offerten nedan för att vi ska sätta igång.<br>Har du frågor är du alltid välkommen att höra av dig.</p>
+            <button class="btn-godkann" onclick="godkann()">Godkänn offert</button>
+          </div>`
+      }
+    `;
+  }
+
+  async function godkann() {
+    const res = await fetch(`${URL}/rest/v1/projekt?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: { ...headers, 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ offert_status: 'godkand', status: 'pagaende' })
+    });
+    if (res.ok) ladda();
+  }
+
+  function visaFel(text) {
+    document.getElementById('offert-panel').innerHTML = `<div class="fel">${text}</div>`;
+  }
+
+  ladda();
+</script>
+
+</body>
+</html>

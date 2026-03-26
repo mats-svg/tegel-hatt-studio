@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tegel och Hatt — Projekt</title>
+  <link rel="stylesheet" href="https://use.typekit.net/ekp3zqm.css" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #fff;
+      color: #000;
+      font-family: 'acumin-pro', 'Acumin Pro', Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      font-size: 17px;
+    }
+
+    header {
+      background: #fff;
+      padding: 24px 40px;
+      border-bottom: 1px solid #e8e8e8;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    header h1 { font-size: 2rem; font-weight: 400; color: #000; font-family: 'Bodoni 72', 'Bodoni72', 'Didot', Georgia, serif; }
+    header p { font-size: 0.8rem; color: #888; margin-top: 3px; }
+
+    .btn {
+      background: #000;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 9px 20px;
+      font-family: 'acumin-pro', 'Acumin Pro', Helvetica, Arial, sans-serif;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+    .btn:hover { background: #fd804b; }
+    .btn-liten { font-size: 0.8rem; padding: 6px 14px; }
+    .btn-grön { background: #000; }
+    .btn-grön:hover { background: #fd804b; }
+    .btn-radera {
+      background: transparent;
+      color: #999;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      padding: 5px 12px;
+    }
+    .btn-radera:hover { border-color: #fd804b; color: #fd804b; }
+
+    main {
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 0 40px 80px;
+    }
+
+    /* Modaler */
+    .modal-bakgrund {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .modal-bakgrund.visas { display: flex; }
+
+    .modal {
+      background: #fff;
+      border-radius: 12px;
+      padding: 40px;
+      width: 100%;
+      max-width: 520px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .modal-bred { max-width: 720px; }
+    .modal h2 { font-size: 2rem; font-weight: 400; margin-bottom: 24px; color: #000; font-family: 'Bodoni 72', 'Bodoni72', 'Didot', Georgia, serif; }
+    .modal p.ingress { font-size: 0.9rem; color: #555; margin-bottom: 20px; line-height: 1.5; }
+
+    .falt { margin-bottom: 18px; }
+    label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 5px;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      background: #fff;
+      color: #000;
+      font-family: 'acumin-pro', 'Acumin Pro', Helvetica, Arial, sans-serif;
+      font-size: 1rem;
+    }
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: #000;
+    }
+
+    .modal-knappar { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
+    .btn-avbryt {
+      background: transparent;
+      color: #555;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 9px 20px;
+      font-family: 'acumin-pro', 'Acumin Pro', Helvetica, Arial, sans-serif;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    .btn-avbryt:hover { border-color: #fd804b; color: #fd804b; }
+
+    /* Mallväljare */
+    .mall-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .mall-kort {
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      padding: 14px 16px;
+      cursor: pointer;
+      background: #fff;
+      transition: border-color 0.15s;
+    }
+    .mall-kort:hover { border-color: #fd804b; }
+    .mall-kort.vald { border-color: #000; background: #f5f5f5; }
+    .mall-kort strong { display: block; font-size: 0.9rem; margin-bottom: 4px; }
+    .mall-kort span { font-size: 0.78rem; color: #888; }
+
+    /* Offert-rader */
+    .offert-rader { margin-bottom: 20px; }
+    .offert-rad {
+      display: grid;
+      grid-template-columns: 1fr 130px 32px;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .offert-rad input { font-size: 0.9rem; }
+    .btn-ta-bort-rad {
+      background: none;
+      border: none;
+      color: #bbb;
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
+    }
+    .btn-ta-bort-rad:hover { color: #fd804b; }
+    .offert-rad-rubrik {
+      display: grid;
+      grid-template-columns: 1fr 130px 32px;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .offert-rad-rubrik span { font-size: 0.75rem; font-weight: 600; color: #555; }
+    .offert-totalt {
+      text-align: right;
+      font-weight: 600;
+      font-size: 1rem;
+      color: #000;
+      padding-top: 12px;
+      border-top: 1px solid #e8e8e8;
+      margin-top: 4px;
+    }
+    .btn-lagg-till-rad {
+      background: none;
+      border: 1px dashed #ddd;
+      color: #888;
+      padding: 7px 14px;
+      font-family: 'acumin-pro', 'Acumin Pro', Helvetica, Arial, sans-serif;
+      font-size: 0.82rem;
+      cursor: pointer;
+      margin-top: 4px;
+    }
+    .btn-lagg-till-rad:hover { border-color: #fd804b; color: #fd804b; }
+
+    /* Offert-status chip */
+    .offert-chip {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      margin-bottom: 8px;
+    }
+    .chip-utkast { background: #f0f0f0; color: #888; }
+    .chip-skickad { background: #e8eeff; color: #3a4a8b; }
+    .chip-godkand { background: #a5a6f6; color: #fff; }
+
+    /* Kolumner */
+    .kolumner {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: #e8e8e8;
+      border: 1px solid #e8e8e8;
+    }
+    @media (max-width: 700px) { .kolumner { grid-template-columns: 1fr 1fr; } }
+
+    .kolumn { background: #f9f9f9; }
+    .kolumn h2 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #888;
+      padding: 12px 16px;
+      border-bottom: 1px solid #e8e8e8;
+      background: #fff;
+    }
+    .kolumn-inner { padding: 16px; }
+
+    .kort {
+      background: #fff;
+      border: 1px solid #e8e8e8;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 10px;
+    }
+    .kort-kund { font-size: 0.82rem; color: #999; margin-bottom: 3px; }
+    .kort-namn { font-size: 1.35rem; font-weight: 400; margin-bottom: 6px; color: #000; font-family: 'Bodoni 72', 'Bodoni72', 'Didot', Georgia, serif; }
+    .kort-belopp { font-size: 1.05rem; font-weight: 500; color: #000; margin-bottom: 8px; }
+    .kort-innehall { font-size: 0.88rem; color: #555; margin-bottom: 12px; line-height: 1.55; }
+    .kort-knappar { display: flex; gap: 8px; flex-wrap: wrap; }
+    .tom-text { font-size: 0.85rem; color: #bbb; padding: 16px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Tegel och Hatt — Projekt</h1>
+    <p>Från offert till faktura</p>
+  </div>
+  <button class="btn" onclick="öppnaModal()">+ Nytt projekt</button>
+</header>
+
+<main>
+  <div class="kolumner">
+    <div class="kolumn kolumn-offert">
+      <h2>Offert</h2>
+      <div class="kolumn-inner"><div id="kolumn-offert"></div></div>
+    </div>
+    <div class="kolumn kolumn-pagaende">
+      <h2>Pågående</h2>
+      <div class="kolumn-inner"><div id="kolumn-pagaende"></div></div>
+    </div>
+    <div class="kolumn kolumn-klart">
+      <h2>Klart att fakturera</h2>
+      <div class="kolumn-inner"><div id="kolumn-klart"></div></div>
+    </div>
+    <div class="kolumn kolumn-fakturerad">
+      <h2>Fakturerat</h2>
+      <div class="kolumn-inner"><div id="kolumn-fakturerad"></div></div>
+    </div>
+  </div>
+</main>
+
+<!-- Modal: Nytt projekt -->
+<div class="modal-bakgrund" id="modal-nytt">
+  <div class="modal">
+    <h2>Nytt projekt</h2>
+    <form id="form-nytt">
+      <div class="falt">
+        <label>Kundnamn</label>
+        <input type="text" name="kundnamn" required placeholder="T.ex. IKEA Sverige" />
+      </div>
+      <div class="falt">
+        <label>Projektnamn</label>
+        <input type="text" name="projektnamn" required placeholder="T.ex. Årsrapport 2026" />
+      </div>
+      <div class="falt">
+        <label>Välj mall för offert</label>
+        <div class="mall-grid" id="mall-grid">
+          <!-- fylls av JS -->
+        </div>
+        <input type="hidden" name="vald_mall" id="vald-mall-input" />
+      </div>
+      <div class="modal-knappar">
+        <button type="submit" class="btn">Nästa — redigera offert</button>
+        <button type="button" class="btn-avbryt" onclick="stängModal()">Avbryt</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Offert-editor -->
+<div class="modal-bakgrund" id="modal-offert">
+  <div class="modal modal-bred">
+    <h2 id="offert-editor-titel">Redigera offert</h2>
+    <div class="falt">
+      <label>Meddelande till kund (valfri inledning)</label>
+      <textarea id="offert-meddelande" rows="3" placeholder="T.ex. Tack för förtroendet — här är vår offert för projektet."></textarea>
+    </div>
+    <div class="offert-rad-rubrik">
+      <span>Beskrivning</span>
+      <span>Belopp (kr)</span>
+      <span></span>
+    </div>
+    <div class="offert-rader" id="offert-rader"></div>
+    <button type="button" class="btn-lagg-till-rad" onclick="läggTillRad()">+ Lägg till rad</button>
+    <div class="offert-totalt" id="offert-totalt">Totalt: 0 kr</div>
+    <div class="modal-knappar">
+      <button class="btn" onclick="sparaOffert('utkast')">Spara utkast</button>
+      <button class="btn btn-grön" onclick="sparaOffert('skickad')">Markera som skickad</button>
+      <button type="button" class="btn-avbryt" onclick="stängOffertModal()">Avbryt</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Klart att fakturera -->
+<div class="modal-bakgrund" id="modal-klar">
+  <div class="modal">
+    <h2>Markera som klart att fakturera</h2>
+    <p class="ingress">Lägg gärna till en kommentar — t.ex. om det tillkommit något utöver offerten.</p>
+    <form id="form-klar">
+      <input type="hidden" name="id" />
+      <div class="falt">
+        <label>Kommentar (valfri)</label>
+        <textarea name="kommentar" rows="3" placeholder="T.ex. 3 extra timmar tillkom för korrektur"></textarea>
+      </div>
+      <div class="modal-knappar">
+        <button type="submit" class="btn btn-grön">Klart att fakturera</button>
+        <button type="button" class="btn-avbryt" onclick="stängKlarModal()">Avbryt</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  const URL = 'https://wehordecxgpxxjagbtuj.supabase.co';
+  const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndlaG9yZGVjeGdweHhqYWdidHVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MTk5MjMsImV4cCI6MjA5MDA5NTkyM30.omrBD5LvuICkdKIfhNFGv2dv1U6Wl_lJS1AE3ggWw0E';
+  const headers = { 'Content-Type': 'application/json', 'apikey': KEY, 'Authorization': `Bearer ${KEY}` };
+
+  // ── Mallar ──────────────────────────────────────────────
+  const MALLAR = [
+    {
+      id: 'kommunikationsplattform',
+      namn: 'Kommunikationsplattform',
+      beskrivning: 'Strategi, budskap, ton',
+      rader: [
+        { beskrivning: 'Nulägesanalys och research', belopp: 25000 },
+        { beskrivning: 'Budskapsarkitektur', belopp: 35000 },
+        { beskrivning: 'Tonalitet och språklig identitet', belopp: 25000 },
+        { beskrivning: 'Kommunikationsriktlinjer', belopp: 20000 },
+      ]
+    },
+    {
+      id: 'visuell-identitet',
+      namn: 'Visuell identitet',
+      beskrivning: 'Logotyp, färg, typografi',
+      rader: [
+        { beskrivning: 'Designanalys och moodboards', belopp: 20000 },
+        { beskrivning: 'Logotyp och varianter', belopp: 45000 },
+        { beskrivning: 'Färgpalett och typografi', belopp: 20000 },
+        { beskrivning: 'Grafiska element och mönster', belopp: 25000 },
+        { beskrivning: 'Identitetsprogram och riktlinjer', belopp: 30000 },
+      ]
+    },
+    {
+      id: 'varumarkesplattform',
+      namn: 'Varumärkesplattform',
+      beskrivning: 'Positionering, värdegrund',
+      rader: [
+        { beskrivning: 'Varumärkesanalys och workshop', belopp: 35000 },
+        { beskrivning: 'Positionering och differentiering', belopp: 30000 },
+        { beskrivning: 'Värdegrund och personlighet', belopp: 25000 },
+        { beskrivning: 'Visuell identitet (grundpaket)', belopp: 40000 },
+        { beskrivning: 'Varumärkesbok', belopp: 20000 },
+      ]
+    },
+    {
+      id: 'hemsida',
+      namn: 'Hemsida',
+      beskrivning: 'Design och utveckling',
+      rader: [
+        { beskrivning: 'Innehållsstruktur och sitemap', belopp: 20000 },
+        { beskrivning: 'UX och wireframes', belopp: 25000 },
+        { beskrivning: 'Visuell design', belopp: 40000 },
+        { beskrivning: 'Utveckling och CMS', belopp: 50000 },
+        { beskrivning: 'Texter och bildproduktion', belopp: 20000 },
+      ]
+    },
+    {
+      id: 'workshop',
+      namn: 'Workshop',
+      beskrivning: 'Facilitering och dokumentation',
+      rader: [
+        { beskrivning: 'Förberedelse och material', belopp: 15000 },
+        { beskrivning: 'Genomförande (halvdag)', belopp: 25000 },
+        { beskrivning: 'Dokumentation och rapport', belopp: 15000 },
+      ]
+    },
+  ];
+
+  // ── Rendera mallar i modal ───────────────────────────────
+  function renderaMallar() {
+    const grid = document.getElementById('mall-grid');
+    grid.innerHTML = MALLAR.map(m => `
+      <div class="mall-kort" data-id="${m.id}" onclick="välJMall('${m.id}')">
+        <strong>${m.namn}</strong>
+        <span>${m.beskrivning}</span>
+      </div>
+    `).join('');
+  }
+
+  function välJMall(id) {
+    document.querySelectorAll('.mall-kort').forEach(el => el.classList.remove('vald'));
+    document.querySelector(`.mall-kort[data-id="${id}"]`).classList.add('vald');
+    document.getElementById('vald-mall-input').value = id;
+  }
+
+  // ── Hämta och rendera projekt ────────────────────────────
+  async function hämtaProjekt() {
+    const res = await fetch(`${URL}/rest/v1/projekt?select=*&order=skapad_at.asc`, { headers });
+    const data = await res.json();
+    renderaProjekt(data);
+  }
+
+  function chipHTML(offert_status) {
+    if (!offert_status || offert_status === 'utkast') return '<span class="offert-chip chip-utkast">Utkast</span>';
+    if (offert_status === 'skickad') return '<span class="offert-chip chip-skickad">Skickad</span>';
+    if (offert_status === 'godkand') return '<span class="offert-chip chip-godkand">Godkänd</span>';
+    return '';
+  }
+
+  function renderaProjekt(projekt) {
+    const kolumner = { offert: [], pagaende: [], klart: [], fakturerad: [] };
+    projekt.forEach(p => { if (kolumner[p.status]) kolumner[p.status].push(p); });
+    Object.entries(kolumner).forEach(([status, lista]) => {
+      const el = document.getElementById(`kolumn-${status}`);
+      if (lista.length === 0) { el.innerHTML = '<div class="tom-text">Inga projekt här ännu.</div>'; return; }
+      el.innerHTML = lista.map(p => kortHTML(p)).join('');
+    });
+  }
+
+  function kortHTML(p) {
+    const belopp = p.belopp ? new Intl.NumberFormat('sv-SE').format(p.belopp) + ' kr' : '';
+    return `
+      <div class="kort">
+        ${p.status === 'offert' ? chipHTML(p.offert_status) : ''}
+        <div class="kort-kund">${p.kundnamn}</div>
+        <div class="kort-namn">${p.projektnamn}</div>
+        ${belopp ? `<div class="kort-belopp">${belopp}</div>` : ''}
+        ${p.innehall ? `<div class="kort-innehall">${p.innehall}</div>` : ''}
+        ${p.klar_kommentar ? `<div class="kort-innehall" style="border-left:2px solid #3a5a3a;padding-left:10px;margin-bottom:10px;">${p.klar_kommentar}</div>` : ''}
+        <div class="kort-knappar">${kortKnappar(p)}</div>
+      </div>`;
+  }
+
+  function kortKnappar(p) {
+    let knappar = '';
+    if (p.status === 'offert') {
+      knappar += `<button class="btn btn-liten" onclick="öppnaOffertEditor('${p.id}')">Redigera offert</button>`;
+      knappar += `<button class="btn btn-liten" style="background:#5a6a7a" onclick="kopieraLänk('${p.id}')">Kopiera länk</button>`;
+      if (p.offert_status === 'skickad') {
+        knappar += `<button class="btn btn-liten btn-grön" onclick="godkännOffert('${p.id}')">Godkänd av kund →</button>`;
+      }
+    }
+    if (p.status === 'pagaende') {
+      knappar += `<button class="btn btn-liten btn-grön" onclick="öppnaKlarModal('${p.id}')">Klart att fakturera ✓</button>`;
+    }
+    if (p.status === 'klart') {
+      knappar += `<button class="btn btn-liten" style="background:#6b5045" onclick="uppdateraStatus('${p.id}', 'fakturerad')">Markera fakturerad →</button>`;
+    }
+    knappar += `<button class="btn btn-liten btn-radera" onclick="raderaProjekt('${p.id}', '${p.projektnamn.replace(/'/g, "\\'")}')">Radera</button>`;
+    return knappar;
+  }
+
+  // ── Nytt projekt ─────────────────────────────────────────
+  function öppnaModal() {
+    renderaMallar();
+    document.getElementById('modal-nytt').classList.add('visas');
+  }
+  function stängModal() {
+    document.getElementById('modal-nytt').classList.remove('visas');
+    document.getElementById('form-nytt').reset();
+    document.querySelectorAll('.mall-kort').forEach(el => el.classList.remove('vald'));
+    document.getElementById('vald-mall-input').value = '';
+  }
+
+  let nyttProjektData = null;
+
+  document.getElementById('form-nytt').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const f = e.target;
+    const mallId = f.vald_mall.value;
+    const mall = MALLAR.find(m => m.id === mallId);
+    nyttProjektData = {
+      kundnamn: f.kundnamn.value,
+      projektnamn: f.projektnamn.value,
+      status: 'offert',
+      offert_status: 'utkast',
+      offert_rader: mall ? mall.rader : [{ beskrivning: '', belopp: 0 }],
+    };
+    stängModal();
+    öppnaOffertEditorNytt();
+  });
+
+  // ── Offert-editor ────────────────────────────────────────
+  let redigertProjektId = null;
+
+  function öppnaOffertEditorNytt() {
+    redigertProjektId = null;
+    document.getElementById('offert-editor-titel').textContent = 'Redigera offert — ' + nyttProjektData.projektnamn;
+    document.getElementById('offert-meddelande').value = '';
+    fyllRadfält(nyttProjektData.offert_rader);
+    document.getElementById('modal-offert').classList.add('visas');
+  }
+
+  async function öppnaOffertEditor(id) {
+    const res = await fetch(`${URL}/rest/v1/projekt?id=eq.${id}&select=*`, { headers });
+    const [p] = await res.json();
+    redigertProjektId = id;
+    nyttProjektData = null;
+    document.getElementById('offert-editor-titel').textContent = 'Redigera offert — ' + p.projektnamn;
+    document.getElementById('offert-meddelande').value = p.offert_meddelande || '';
+    fyllRadfält(p.offert_rader || [{ beskrivning: '', belopp: 0 }]);
+    document.getElementById('modal-offert').classList.add('visas');
+  }
+
+  function stängOffertModal() {
+    document.getElementById('modal-offert').classList.remove('visas');
+    redigertProjektId = null;
+    nyttProjektData = null;
+  }
+
+  function fyllRadfält(rader) {
+    const container = document.getElementById('offert-rader');
+    container.innerHTML = '';
+    rader.forEach(r => läggTillRadMedVärde(r.beskrivning, r.belopp));
+    uppdateraTotalt();
+  }
+
+  function läggTillRad() { läggTillRadMedVärde('', 0); }
+
+  function läggTillRadMedVärde(beskrivning, belopp) {
+    const container = document.getElementById('offert-rader');
+    const div = document.createElement('div');
+    div.className = 'offert-rad';
+    div.innerHTML = `
+      <input type="text" class="rad-beskrivning" placeholder="T.ex. Logotyp och varianter" value="${beskrivning}" oninput="uppdateraTotalt()" />
+      <input type="number" class="rad-belopp" placeholder="0" value="${belopp || ''}" oninput="uppdateraTotalt()" />
+      <button type="button" class="btn-ta-bort-rad" onclick="this.parentElement.remove(); uppdateraTotalt()">×</button>
+    `;
+    container.appendChild(div);
+  }
+
+  function uppdateraTotalt() {
+    const belopp = [...document.querySelectorAll('.rad-belopp')].reduce((s, el) => s + (Number(el.value) || 0), 0);
+    document.getElementById('offert-totalt').textContent = 'Totalt: ' + new Intl.NumberFormat('sv-SE').format(belopp) + ' kr';
+  }
+
+  function läsAvRader() {
+    return [...document.querySelectorAll('.offert-rad')].map(div => ({
+      beskrivning: div.querySelector('.rad-beskrivning').value,
+      belopp: Number(div.querySelector('.rad-belopp').value) || 0
+    }));
+  }
+
+  async function sparaOffert(offert_status) {
+    const rader = läsAvRader();
+    const totalt = rader.reduce((s, r) => s + r.belopp, 0);
+    const meddelande = document.getElementById('offert-meddelande').value;
+
+    if (nyttProjektData) {
+      // Skapa nytt projekt
+      await fetch(`${URL}/rest/v1/projekt`, {
+        method: 'POST',
+        headers: { ...headers, 'Prefer': 'return=minimal' },
+        body: JSON.stringify({
+          ...nyttProjektData,
+          offert_rader: rader,
+          offert_status,
+          offert_meddelande: meddelande,
+          belopp: totalt,
+        })
+      });
+    } else {
+      // Uppdatera befintligt
+      await fetch(`${URL}/rest/v1/projekt?id=eq.${redigertProjektId}`, {
+        method: 'PATCH',
+        headers: { ...headers, 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ offert_rader: rader, offert_status, offert_meddelande: meddelande, belopp: totalt })
+      });
+    }
+    stängOffertModal();
+    hämtaProjekt();
+  }
+
+  // ── Godkänn offert → Pågående ────────────────────────────
+  function kopieraLänk(id) {
+    const bas = window.location.href.replace('projekt.html', 'offert.html');
+    const länk = `${bas}?id=${id}`;
+    navigator.clipboard.writeText(länk).then(() => alert('Länken är kopierad! Klistra in den i ett mejl till kunden.'));
+  }
+
+  async function godkännOffert(id) {
+    await fetch(`${URL}/rest/v1/projekt?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: { ...headers, 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ status: 'pagaende', offert_status: 'godkand' })
+    });
+    hämtaProjekt();
+  }
+
+  // ── Övriga funktioner ────────────────────────────────────
+  async function uppdateraStatus(id, status) {
+    await fetch(`${URL}/rest/v1/projekt?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: { ...headers, 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ status })
+    });
+    hämtaProjekt();
+  }
+
+  async function raderaProjekt(id, namn) {
+    if (!confirm(`Radera "${namn}"?`)) return;
+    await fetch(`${URL}/rest/v1/projekt?id=eq.${id}`, {
+      method: 'DELETE',
+      headers: { ...headers, 'Prefer': 'return=minimal' }
+    });
+    hämtaProjekt();
+  }
+
+  let aktivtId = null;
+  function öppnaKlarModal(id) {
+    aktivtId = id;
+    document.getElementById('modal-klar').classList.add('visas');
+  }
+  function stängKlarModal() {
+    document.getElementById('modal-klar').classList.remove('visas');
+    document.getElementById('form-klar').reset();
+    aktivtId = null;
+  }
+
+  document.getElementById('form-klar').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const kommentar = e.target.kommentar.value;
+    await fetch(`${URL}/rest/v1/projekt?id=eq.${aktivtId}`, {
+      method: 'PATCH',
+      headers: { ...headers, 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ status: 'klart', klar_kommentar: kommentar, klar_at: new Date().toISOString() })
+    });
+    stängKlarModal();
+    hämtaProjekt();
+  });
+
+  document.querySelectorAll('.modal-bakgrund').forEach(el => {
+    el.addEventListener('click', (e) => { if (e.target === el) el.classList.remove('visas'); });
+  });
+
+  hämtaProjekt();
+</script>
+
+</body>
+</html>
