@@ -163,7 +163,7 @@
 
     .rader-rubrik {
       display: grid;
-      grid-template-columns: 1fr 150px;
+      grid-template-columns: 32px 1fr 150px 32px;
       gap: 8px;
       font-size: 0.75rem;
       font-weight: 600;
@@ -175,15 +175,67 @@
 
     .rad {
       display: grid;
-      grid-template-columns: 1fr 150px;
+      grid-template-columns: 32px 1fr 150px 32px;
       gap: 8px;
-      padding: 14px 0;
+      padding: 12px 0;
       border-bottom: 1px solid #f0f0f0;
       font-size: 0.95rem;
       align-items: center;
+      transition: opacity 0.15s;
+    }
+
+    .rad.inaktiv { opacity: 0.35; }
+    .rad.inaktiv .rad-beskrivning { text-decoration: line-through; }
+
+    .rad-checkbox {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: #000;
     }
 
     .rad-belopp { text-align: right; color: #555; }
+
+    .rad-ta-bort {
+      background: none;
+      border: none;
+      color: #ccc;
+      font-size: 1.1rem;
+      cursor: pointer;
+      padding: 0;
+      text-align: center;
+    }
+    .rad.ny .rad-ta-bort { color: #bbb; }
+    .rad-ta-bort:hover { color: #fd804b; }
+
+    .btn-lagg-till {
+      background: none;
+      border: 1px dashed #ddd;
+      border-radius: 6px;
+      color: #888;
+      padding: 8px 16px;
+      font-family: 'acumin-pro', 'Acumin Pro', Helvetica, Arial, sans-serif;
+      font-size: 0.85rem;
+      cursor: pointer;
+      margin-top: 8px;
+      width: 100%;
+    }
+    .btn-lagg-till:hover { border-color: #fd804b; color: #fd804b; }
+
+    .ny-rad-form {
+      display: grid;
+      grid-template-columns: 1fr 140px;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .ny-rad-form input {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-family: 'acumin-pro', 'Acumin Pro', Helvetica, Arial, sans-serif;
+      font-size: 0.9rem;
+    }
+    .ny-rad-form input:focus { outline: none; border-color: #000; }
 
     .totalt-rad {
       display: flex;
@@ -330,7 +382,6 @@
 
   function rendera(p) {
     const rader = p.offert_rader || [];
-    const totalt = rader.reduce((s, r) => s + (r.belopp || 0), 0);
     const datum = new Date(p.skapad_at).toLocaleDateString('sv-SE', { year: 'numeric', month: 'long', day: 'numeric' });
     const godkand = p.offert_status === 'godkand';
 
@@ -339,30 +390,30 @@
     const nr = String(p.offert_nummer).padStart(3, '0');
     document.getElementById('intro-nummer').textContent = `${år}-${nr}`;
 
+    const totalt = rader.reduce((s, r) => s + (r.belopp || 0), 0);
+
     document.getElementById('offert-panel').innerHTML = `
       ${chipHTML(p.offert_status)}
-
       <h1 class="offert-rubrik">${p.projektnamn}</h1>
       <p class="offert-kund">${p.kundnamn} &nbsp;·&nbsp; ${datum}</p>
-
       <hr class="divider" />
-
       ${p.offert_meddelande ? `<p class="meddelande">${p.offert_meddelande.replace(/\n/g, '<br>')}</p><hr class="divider" />` : ''}
 
       <div class="rader-rubrik">
-        <span>Beskrivning</span>
+        <span></span>
+        <span>Moment</span>
         <span style="text-align:right">Belopp</span>
+        <span></span>
       </div>
-      ${rader.map(r => `
-        <div class="rad">
-          <span>${r.beskrivning}</span>
-          <span class="rad-belopp">${new Intl.NumberFormat('sv-SE').format(r.belopp)} kr</span>
-        </div>
-      `).join('')}
+      <div id="rader-lista">
+        ${rader.map((r, i) => radHTML(r, i, false)).join('')}
+      </div>
+
+      ${!godkand ? `<button class="btn-lagg-till" onclick="läggTillRad()">+ Lägg till moment</button>` : ''}
 
       <div class="totalt-rad">
         <span class="totalt-label">Totalt</span>
-        <span class="totalt-belopp">${new Intl.NumberFormat('sv-SE').format(totalt)} kr</span>
+        <span class="totalt-belopp" id="totalt-belopp">${new Intl.NumberFormat('sv-SE').format(totalt)} kr</span>
       </div>
 
       <div class="deko-bild">
@@ -375,18 +426,107 @@
             <p>Tack! Vi hör av oss för att komma igång.</p>
           </div>`
         : `<div class="godkann-sektion">
-            <p>Godkänn offerten nedan för att vi ska sätta igång.<br>Har du frågor är du alltid välkommen att höra av dig.</p>
+            <p>Bocka av de moment du vill ha med, lägg till egna om du vill, och godkänn sedan nedan.</p>
             <button class="btn-godkann" onclick="godkann()">Godkänn offert</button>
           </div>`
       }
     `;
+
+    uppdateraTotalt();
+  }
+
+  function radHTML(r, i, nyRad) {
+    const fmt = new Intl.NumberFormat('sv-SE').format(r.belopp);
+    return `
+      <div class="rad${nyRad ? ' ny' : ''}" id="rad-${i}">
+        <input type="checkbox" class="rad-checkbox" checked onchange="uppdateraTotalt()" />
+        <span class="rad-beskrivning">${r.beskrivning}</span>
+        <span class="rad-belopp">${fmt} kr</span>
+        <button class="rad-ta-bort" onclick="taBortRad(${i})" title="Ta bort">×</button>
+      </div>`;
+  }
+
+  let extraRader = [];
+
+  function läggTillRad() {
+    const lista = document.getElementById('rader-lista');
+    const i = lista.children.length;
+    const div = document.createElement('div');
+    div.innerHTML = `
+      <div class="ny-rad-form" id="ny-form-${i}">
+        <input type="text" placeholder="Beskriv momentet" id="ny-beskr-${i}" />
+        <input type="number" placeholder="Belopp" id="ny-belopp-${i}" />
+      </div>
+      <div style="display:flex;gap:8px;margin-top:6px;margin-bottom:8px;">
+        <button class="btn-godkann" style="padding:7px 20px;font-size:0.82rem;" onclick="bekräftaNyRad(${i})">Lägg till</button>
+        <button class="btn-lagg-till" style="width:auto;margin:0;" onclick="this.closest('div').previousSibling.remove();this.closest('div').remove()">Avbryt</button>
+      </div>`;
+    lista.appendChild(div);
+  }
+
+  function bekräftaNyRad(i) {
+    const beskr = document.getElementById(`ny-beskr-${i}`).value.trim();
+    const belopp = Number(document.getElementById(`ny-belopp-${i}`).value) || 0;
+    if (!beskr) return;
+    const lista = document.getElementById('rader-lista');
+    const formContainer = document.getElementById(`ny-form-${i}`).parentElement;
+    const nyIndex = lista.querySelectorAll('.rad').length;
+    const radDiv = document.createElement('div');
+    radDiv.innerHTML = radHTML({ beskrivning: beskr, belopp }, nyIndex, true);
+    lista.insertBefore(radDiv.firstElementChild, formContainer);
+    formContainer.remove();
+    uppdateraTotalt();
+  }
+
+  function taBortRad(i) {
+    const rad = document.getElementById(`rad-${i}`);
+    if (rad) { rad.remove(); uppdateraTotalt(); }
+  }
+
+  function uppdateraTotalt() {
+    const rader = document.querySelectorAll('#rader-lista .rad');
+    let totalt = 0;
+    rader.forEach(rad => {
+      const checkbox = rad.querySelector('.rad-checkbox');
+      const beloppEl = rad.querySelector('.rad-belopp');
+      if (checkbox && beloppEl) {
+        const checked = checkbox.checked;
+        rad.classList.toggle('inaktiv', !checked);
+        if (checked) {
+          const belopp = parseInt(beloppEl.textContent.replace(/\s/g, '').replace('kr', '')) || 0;
+          totalt += belopp;
+        }
+      }
+    });
+    const el = document.getElementById('totalt-belopp');
+    if (el) el.textContent = new Intl.NumberFormat('sv-SE').format(totalt) + ' kr';
+  }
+
+  function läsAvJusteradeRader() {
+    const rader = [];
+    document.querySelectorAll('#rader-lista .rad').forEach(rad => {
+      const checkbox = rad.querySelector('.rad-checkbox');
+      if (!checkbox || !checkbox.checked) return;
+      const beskr = rad.querySelector('.rad-beskrivning')?.textContent.trim();
+      const beloppText = rad.querySelector('.rad-belopp')?.textContent || '0';
+      const belopp = parseInt(beloppText.replace(/\s/g, '').replace('kr', '')) || 0;
+      if (beskr) rader.push({ beskrivning: beskr, belopp });
+    });
+    return rader;
   }
 
   async function godkann() {
+    const justeradeRader = läsAvJusteradeRader();
+    const totalt = justeradeRader.reduce((s, r) => s + r.belopp, 0);
     const res = await fetch(`${URL}/rest/v1/projekt?id=eq.${id}`, {
       method: 'PATCH',
       headers: { ...headers, 'Prefer': 'return=minimal' },
-      body: JSON.stringify({ offert_status: 'godkand', status: 'pagaende' })
+      body: JSON.stringify({
+        offert_status: 'godkand',
+        status: 'pagaende',
+        offert_rader: justeradeRader,
+        belopp: totalt
+      })
     });
     if (res.ok) ladda();
   }
