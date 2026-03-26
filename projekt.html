@@ -152,6 +152,29 @@
     .mall-kort strong { display: block; font-size: 0.9rem; margin-bottom: 4px; }
     .mall-kort span { font-size: 0.78rem; color: #888; }
 
+    /* Nok-alternativ */
+    .nok-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .nok-alternativ {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 400;
+      color: #000;
+      transition: border-color 0.15s;
+    }
+    .nok-alternativ:hover { border-color: #fd804b; }
+    .nok-alternativ input { width: auto; cursor: pointer; accent-color: #000; }
+    .nok-alternativ:has(input:checked) { border-color: #000; background: #f5f5f5; }
+
     /* Offert-rader */
     .offert-rader { margin-bottom: 20px; }
     .offert-rad {
@@ -299,6 +322,14 @@
     <h2>Nytt projekt</h2>
     <form id="form-nytt">
       <div class="falt">
+        <label>Projekttyp</label>
+        <select name="projekttyp" id="projekttyp-val" onchange="uppdateraProjekttyp()">
+          <option value="offert">Offert</option>
+          <option value="nok-lopande">Nok-löpande</option>
+          <option value="behovs-ej-offert">Behövs ej offert</option>
+        </select>
+      </div>
+      <div class="falt">
         <label>Kundnamn</label>
         <input type="text" name="kundnamn" required placeholder="T.ex. IKEA Sverige" />
       </div>
@@ -316,15 +347,26 @@
           <option value="Åsa Hammarström">Åsa Hammarström</option>
         </select>
       </div>
-      <div class="falt">
+      <div class="falt" id="falt-mall">
         <label>Välj mall för offert</label>
         <div class="mall-grid" id="mall-grid">
           <!-- fylls av JS -->
         </div>
         <input type="hidden" name="vald_mall" id="vald-mall-input" />
       </div>
+      <div class="falt" id="falt-nok" style="display:none">
+        <label>Välj leverabler</label>
+        <div class="nok-grid">
+          <label class="nok-alternativ"><input type="checkbox" name="nok_val" value="Annons nivå 1" /> Annons nivå 1</label>
+          <label class="nok-alternativ"><input type="checkbox" name="nok_val" value="Annons nivå 2" /> Annons nivå 2</label>
+          <label class="nok-alternativ"><input type="checkbox" name="nok_val" value="Banner nivå 1" /> Banner nivå 1</label>
+          <label class="nok-alternativ"><input type="checkbox" name="nok_val" value="Banner nivå 2" /> Banner nivå 2</label>
+          <label class="nok-alternativ"><input type="checkbox" name="nok_val" value="Folder 6 sid" /> Folder 6 sid</label>
+          <label class="nok-alternativ"><input type="checkbox" name="nok_val" value="Folder 8 sidor" /> Folder 8 sidor</label>
+        </div>
+      </div>
       <div class="modal-knappar">
-        <button type="submit" class="btn">Nästa — redigera offert</button>
+        <button type="submit" class="btn" id="submit-nytt">Nästa — redigera offert</button>
         <button type="button" class="btn-avbryt" onclick="stängModal()">Avbryt</button>
       </div>
     </form>
@@ -529,12 +571,22 @@
   function öppnaModal() {
     renderaMallar();
     document.getElementById('modal-nytt').classList.add('visas');
+    uppdateraProjekttyp();
   }
   function stängModal() {
     document.getElementById('modal-nytt').classList.remove('visas');
     document.getElementById('form-nytt').reset();
     document.querySelectorAll('.mall-kort').forEach(el => el.classList.remove('vald'));
     document.getElementById('vald-mall-input').value = '';
+    uppdateraProjekttyp();
+  }
+
+  function uppdateraProjekttyp() {
+    const typ = document.getElementById('projekttyp-val').value;
+    document.getElementById('falt-mall').style.display = typ === 'offert' ? '' : 'none';
+    document.getElementById('falt-nok').style.display = typ === 'nok-lopande' ? '' : 'none';
+    const knapp = document.getElementById('submit-nytt');
+    knapp.textContent = typ === 'offert' ? 'Nästa — redigera offert' : 'Skapa projekt';
   }
 
   let nyttProjektData = null;
@@ -542,18 +594,41 @@
   document.getElementById('form-nytt').addEventListener('submit', async (e) => {
     e.preventDefault();
     const f = e.target;
-    const mallId = f.vald_mall.value;
+    const typ = f.projekttyp.value;
+    const mallId = f.vald_mall ? f.vald_mall.value : '';
     const mall = MALLAR.find(m => m.id === mallId);
-    nyttProjektData = {
-      kundnamn: f.kundnamn.value,
-      projektnamn: f.projektnamn.value,
-      ansvarig: f.ansvarig.value,
-      status: 'offert',
-      offert_status: 'utkast',
-      offert_rader: mall ? mall.rader : [{ beskrivning: '', belopp: 0 }],
-    };
-    stängModal();
-    öppnaOffertEditorNytt();
+
+    if (typ === 'offert') {
+      nyttProjektData = {
+        kundnamn: f.kundnamn.value,
+        projektnamn: f.projektnamn.value,
+        ansvarig: f.ansvarig.value,
+        projekttyp: typ,
+        status: 'offert',
+        offert_status: 'utkast',
+        offert_rader: mall ? mall.rader : [{ beskrivning: '', belopp: 0 }],
+      };
+      stängModal();
+      öppnaOffertEditorNytt();
+    } else {
+      // Nok-löpande eller Behövs ej offert — spara direkt som Pågående
+      const nokValde = [...document.querySelectorAll('input[name="nok_val"]:checked')].map(cb => cb.value);
+      await fetch(`${URL}/rest/v1/projekt`, {
+        method: 'POST',
+        headers: { ...headers, 'Prefer': 'return=minimal' },
+        body: JSON.stringify({
+          kundnamn: f.kundnamn.value,
+          projektnamn: f.projektnamn.value,
+          ansvarig: f.ansvarig.value,
+          projekttyp: typ,
+          innehall: nokValde.length ? nokValde.join(', ') : null,
+          status: 'pagaende',
+          offert_status: null,
+        })
+      });
+      stängModal();
+      hämtaProjekt();
+    }
   });
 
   // ── Offert-editor ────────────────────────────────────────
