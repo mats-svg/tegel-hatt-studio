@@ -286,7 +286,7 @@
   <img class="intro-logo" src="https://www.tegelochhatt.se/app/themes/tegel-o-hatt//assets/images/logo_white.svg" alt="Tegel och Hatt" />
   <div class="intro-text">
     <h1>Offert</h1>
-    <p>Tegel och Hatt</p>
+    <p id="intro-nummer">Laddar…</p>
   </div>
 </div>
 
@@ -335,6 +335,9 @@
     const godkand = p.offert_status === 'godkand';
 
     document.title = `Offert — ${p.projektnamn}`;
+    const år = new Date(p.skapad_at).getFullYear();
+    const nr = String(p.offert_nummer).padStart(3, '0');
+    document.getElementById('intro-nummer').textContent = `${år}-${nr}`;
 
     document.getElementById('offert-panel').innerHTML = `
       ${chipHTML(p.offert_status)}
