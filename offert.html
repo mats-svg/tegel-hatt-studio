@@ -16,6 +16,49 @@
       font-size: 16px;
     }
 
+    /* Animationer */
+    @keyframes tonaIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes tonaInUpp {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes räknare {
+      from { opacity: 0.4; transform: scale(0.97); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    .intro-logo {
+      animation: tonaIn 0.8s ease both;
+      animation-delay: 0.2s;
+      opacity: 0;
+    }
+
+    .intro-text h1 {
+      animation: tonaIn 1s ease both;
+      animation-delay: 0.5s;
+      opacity: 0;
+    }
+
+    .intro-text p {
+      animation: tonaIn 1s ease both;
+      animation-delay: 0.75s;
+      opacity: 0;
+    }
+
+    .rad {
+      animation: tonaInUpp 0.4s ease both;
+      opacity: 0;
+    }
+
+    .totalt-blink {
+      animation: räknare 0.25s ease both;
+    }
+
     /* Introsida */
     .intro {
       position: relative;
@@ -57,6 +100,7 @@
       line-height: 1;
       color: #fff;
       letter-spacing: -0.01em;
+      /* animation satt via @keyframes ovan */
     }
 
     .intro-text p {
@@ -64,6 +108,7 @@
       color: rgba(255,255,255,0.6);
       margin-top: 12px;
       letter-spacing: 0.04em;
+      /* animation satt via @keyframes ovan */
     }
 
     .layout {
@@ -489,8 +534,9 @@
   function radHTML(r, i) {
     basBelopp[i] = r.belopp;
     const fmt = new Intl.NumberFormat('sv-SE').format(r.belopp);
+    const delay = (i * 0.08 + 0.2).toFixed(2);
     return `
-      <div class="rad" id="rad-${i}" data-bas="${r.belopp}" data-antal="1">
+      <div class="rad" id="rad-${i}" data-bas="${r.belopp}" data-antal="1" style="animation-delay:${delay}s">
         <span class="rad-beskrivning">${r.beskrivning}</span>
         <div class="rad-antal">
           <button class="rad-antal-knapp" onclick="ändraAntal(${i}, -1)" id="minus-${i}">−</button>
@@ -523,7 +569,12 @@
       totalt += antal * bas;
     });
     const el = document.getElementById('totalt-belopp');
-    if (el) el.textContent = new Intl.NumberFormat('sv-SE').format(totalt) + ' kr';
+    if (el) {
+      el.textContent = new Intl.NumberFormat('sv-SE').format(totalt) + ' kr';
+      el.classList.remove('totalt-blink');
+      void el.offsetWidth;
+      el.classList.add('totalt-blink');
+    }
   }
 
   function läsAvJusteradeRader() {
