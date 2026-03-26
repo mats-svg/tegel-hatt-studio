@@ -329,21 +329,26 @@
           <option value="behovs-ej-offert">Behövs ej offert</option>
         </select>
       </div>
-      <div class="falt">
+      <div class="falt" id="falt-kundnamn">
         <label>Kundnamn</label>
-        <input type="text" name="kundnamn" required placeholder="T.ex. IKEA Sverige" />
+        <input type="text" name="kundnamn" id="input-kundnamn" required placeholder="T.ex. IKEA Sverige" />
       </div>
-      <div class="falt">
+      <div class="falt" id="falt-projektnamn">
         <label>Projektnamn</label>
-        <input type="text" name="projektnamn" required placeholder="T.ex. Årsrapport 2026" />
+        <input type="text" name="projektnamn" id="input-projektnamn" required placeholder="T.ex. Årsrapport 2026" />
       </div>
       <div class="falt">
         <label>Ansvarig</label>
         <select name="ansvarig">
           <option value="">— Välj person —</option>
+          <option value="Ann Förberg">Ann Förberg</option>
           <option value="Johanna Karlsson Engholm">Johanna Karlsson Engholm</option>
+          <option value="Marie Stana">Marie Stana</option>
           <option value="Mats Hedman">Mats Hedman</option>
+          <option value="Mia Breitholtz">Mia Breitholtz</option>
           <option value="My Longley">My Longley</option>
+          <option value="Tess Wallenberg">Tess Wallenberg</option>
+          <option value="Ulrika Parling">Ulrika Parling</option>
           <option value="Åsa Hammarström">Åsa Hammarström</option>
         </select>
       </div>
@@ -381,9 +386,14 @@
       <label>Ansvarig</label>
       <select id="offert-ansvarig">
         <option value="">— Välj person —</option>
+        <option value="Ann Förberg">Ann Förberg</option>
         <option value="Johanna Karlsson Engholm">Johanna Karlsson Engholm</option>
+        <option value="Marie Stana">Marie Stana</option>
         <option value="Mats Hedman">Mats Hedman</option>
+        <option value="Mia Breitholtz">Mia Breitholtz</option>
         <option value="My Longley">My Longley</option>
+        <option value="Tess Wallenberg">Tess Wallenberg</option>
+        <option value="Ulrika Parling">Ulrika Parling</option>
         <option value="Åsa Hammarström">Åsa Hammarström</option>
       </select>
     </div>
@@ -583,8 +593,13 @@
 
   function uppdateraProjekttyp() {
     const typ = document.getElementById('projekttyp-val').value;
+    const isNok = typ === 'nok-lopande';
+    document.getElementById('falt-kundnamn').style.display = isNok ? 'none' : '';
+    document.getElementById('falt-projektnamn').style.display = isNok ? 'none' : '';
+    document.getElementById('input-kundnamn').required = !isNok;
+    document.getElementById('input-projektnamn').required = !isNok;
     document.getElementById('falt-mall').style.display = typ === 'offert' ? '' : 'none';
-    document.getElementById('falt-nok').style.display = typ === 'nok-lopande' ? '' : 'none';
+    document.getElementById('falt-nok').style.display = isNok ? '' : 'none';
     const knapp = document.getElementById('submit-nytt');
     knapp.textContent = typ === 'offert' ? 'Nästa — redigera offert' : 'Skapa projekt';
   }
@@ -617,11 +632,11 @@
         method: 'POST',
         headers: { ...headers, 'Prefer': 'return=minimal' },
         body: JSON.stringify({
-          kundnamn: f.kundnamn.value,
-          projektnamn: f.projektnamn.value,
+          kundnamn: typ === 'nok-lopande' ? 'Nok-löpande' : f.kundnamn.value,
+          projektnamn: nokValde.length ? nokValde.join(', ') : (typ === 'nok-lopande' ? 'Nok-löpande' : f.projektnamn.value),
           ansvarig: f.ansvarig.value,
           projekttyp: typ,
-          innehall: nokValde.length ? nokValde.join(', ') : null,
+          innehall: null,
           status: 'pagaende',
           offert_status: null,
         })
