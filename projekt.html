@@ -287,6 +287,16 @@
         <input type="text" name="projektnamn" required placeholder="T.ex. Årsrapport 2026" />
       </div>
       <div class="falt">
+        <label>Ansvarig</label>
+        <select name="ansvarig">
+          <option value="">— Välj person —</option>
+          <option value="Johanna Karlsson Engholm">Johanna Karlsson Engholm</option>
+          <option value="Mats Hedman">Mats Hedman</option>
+          <option value="My Longley">My Longley</option>
+          <option value="Åsa Hammarström">Åsa Hammarström</option>
+        </select>
+      </div>
+      <div class="falt">
         <label>Välj mall för offert</label>
         <div class="mall-grid" id="mall-grid">
           <!-- fylls av JS -->
@@ -516,6 +526,7 @@
     nyttProjektData = {
       kundnamn: f.kundnamn.value,
       projektnamn: f.projektnamn.value,
+      ansvarig: f.ansvarig.value,
       status: 'offert',
       offert_status: 'utkast',
       offert_rader: mall ? mall.rader : [{ beskrivning: '', belopp: 0 }],
@@ -531,6 +542,7 @@
     redigertProjektId = null;
     document.getElementById('offert-editor-titel').textContent = 'Redigera offert — ' + nyttProjektData.projektnamn;
     document.getElementById('offert-meddelande').value = '';
+    document.getElementById('offert-ansvarig').value = nyttProjektData.ansvarig || '';
     fyllRadfält(nyttProjektData.offert_rader);
     document.getElementById('modal-offert').classList.add('visas');
   }
