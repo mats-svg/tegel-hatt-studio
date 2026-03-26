@@ -473,7 +473,7 @@
     document.getElementById('offert-panel').innerHTML = `
       ${chipHTML(p.offert_status)}
       <h1 class="offert-rubrik">${p.projektnamn}</h1>
-      <p class="offert-kund">${p.kundnamn} &nbsp;·&nbsp; ${datum}</p>
+      <p class="offert-kund">${p.kundnamn} &nbsp;·&nbsp; ${datum}${p.ansvarig ? ` &nbsp;·&nbsp; ${p.ansvarig}` : ''}</p>
       <hr class="divider" />
       ${p.offert_meddelande ? `<p class="meddelande">${p.offert_meddelande.replace(/\n/g, '<br>')}</p><hr class="divider" />` : ''}
 
