@@ -234,6 +234,46 @@
     }
     .ny-rad-form input:focus { outline: none; border-color: #000; }
 
+    .villkor {
+      margin-top: 40px;
+      padding: 28px 32px;
+      background: #f9f9f9;
+      border-radius: 10px;
+      border-left: 3px solid #e8e8e8;
+    }
+
+    .villkor h3 {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #aaa;
+      margin-bottom: 16px;
+      letter-spacing: 0.05em;
+    }
+
+    .villkor ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .villkor li {
+      font-size: 0.82rem;
+      color: #888;
+      line-height: 1.55;
+      padding-left: 16px;
+      position: relative;
+    }
+
+    .villkor li::before {
+      content: '—';
+      position: absolute;
+      left: 0;
+      color: #ccc;
+    }
+
     .totalt-rad {
       display: flex;
       justify-content: space-between;
@@ -413,6 +453,24 @@
       <div class="deko-bild">
         <img src="https://www.tegelochhatt.se/app/uploads/2024/11/mm-book-bk-c-03-2-1.webp" alt="" />
       </div>
+
+      ${(() => {
+        const giltigTill = new Date(p.skapad_at);
+        giltigTill.setMonth(giltigTill.getMonth() + 6);
+        const giltigStr = giltigTill.toLocaleDateString('sv-SE', { year: 'numeric', month: 'long', day: 'numeric' });
+        return `
+        <div class="villkor">
+          <h3>Villkor</h3>
+          <ul>
+            <li>Alla priser är exklusive moms. Moms tillkommer med 25% på angivet belopp.</li>
+            <li>Offerten är giltig till och med ${giltigStr}.</li>
+            <li>Betalningsvillkor: 50% vid projektstart, 50% vid leverans. Faktura med 30 dagars nettokreditid.</li>
+            <li>Upphovsrätten till levererat material övergår till kunden efter full betalning.</li>
+            <li>Arbete som tillkommer utöver offertens omfattning debiteras enligt löpande räkning och kommuniceras i förväg.</li>
+            <li>Vid avbeställning efter påbörjat arbete debiteras nedlagd tid enligt löpande räkning.</li>
+          </ul>
+        </div>`;
+      })()}
 
       ${godkand
         ? `<div class="godkand-banner">
