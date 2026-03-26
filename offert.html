@@ -50,11 +50,6 @@
       opacity: 0;
     }
 
-    .rad {
-      animation: tonaInUpp 0.4s ease both;
-      opacity: 0;
-    }
-
     .totalt-blink {
       animation: räknare 0.25s ease both;
     }
@@ -226,6 +221,8 @@
       border-bottom: 1px solid #f0f0f0;
       font-size: 0.95rem;
       align-items: center;
+      animation: tonaInUpp 0.5s ease both;
+      opacity: 0;
     }
 
     .rad-belopp { text-align: right; color: #555; }
@@ -572,8 +569,7 @@
     if (el) {
       el.textContent = new Intl.NumberFormat('sv-SE').format(totalt) + ' kr';
       el.classList.remove('totalt-blink');
-      void el.offsetWidth;
-      el.classList.add('totalt-blink');
+      setTimeout(() => el.classList.add('totalt-blink'), 10);
     }
   }
 
