@@ -163,7 +163,7 @@
 
     .rader-rubrik {
       display: grid;
-      grid-template-columns: 32px 1fr 150px 32px;
+      grid-template-columns: 1fr 120px 100px;
       gap: 8px;
       font-size: 0.75rem;
       font-weight: 600;
@@ -175,52 +175,49 @@
 
     .rad {
       display: grid;
-      grid-template-columns: 32px 1fr 150px 32px;
+      grid-template-columns: 1fr 120px 100px;
       gap: 8px;
       padding: 12px 0;
       border-bottom: 1px solid #f0f0f0;
       font-size: 0.95rem;
       align-items: center;
-      transition: opacity 0.15s;
-    }
-
-    .rad.inaktiv { opacity: 0.35; }
-    .rad.inaktiv .rad-beskrivning { text-decoration: line-through; }
-
-    .rad-checkbox {
-      width: 18px;
-      height: 18px;
-      cursor: pointer;
-      accent-color: #000;
     }
 
     .rad-belopp { text-align: right; color: #555; }
 
-    .rad-ta-bort {
-      background: none;
-      border: none;
-      color: #ccc;
-      font-size: 1.1rem;
-      cursor: pointer;
-      padding: 0;
-      text-align: center;
+    .rad-antal {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
     }
-    .rad.ny .rad-ta-bort { color: #bbb; }
-    .rad-ta-bort:hover { color: #fd804b; }
 
-    .btn-lagg-till {
+    .rad-antal-knapp {
       background: none;
-      border: 1px dashed #ddd;
-      border-radius: 6px;
-      color: #888;
-      padding: 8px 16px;
-      font-family: 'acumin-pro', 'Acumin Pro', Helvetica, Arial, sans-serif;
-      font-size: 0.85rem;
+      border: 1px solid #ddd;
+      border-radius: 50%;
+      width: 26px;
+      height: 26px;
+      font-size: 1rem;
+      line-height: 1;
       cursor: pointer;
-      margin-top: 8px;
-      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #555;
+      transition: border-color 0.15s, color 0.15s;
+      flex-shrink: 0;
     }
-    .btn-lagg-till:hover { border-color: #fd804b; color: #fd804b; }
+    .rad-antal-knapp:hover { border-color: #fd804b; color: #fd804b; }
+    .rad-antal-knapp:disabled { opacity: 0.25; cursor: default; }
+    .rad-antal-knapp:disabled:hover { border-color: #ddd; color: #555; }
+
+    .rad-antal-nummer {
+      font-size: 0.9rem;
+      min-width: 16px;
+      text-align: center;
+      color: #000;
+    }
 
     .ny-rad-form {
       display: grid;
@@ -400,16 +397,13 @@
       ${p.offert_meddelande ? `<p class="meddelande">${p.offert_meddelande.replace(/\n/g, '<br>')}</p><hr class="divider" />` : ''}
 
       <div class="rader-rubrik">
-        <span></span>
         <span>Moment</span>
+        <span style="text-align:right">Antal</span>
         <span style="text-align:right">Belopp</span>
-        <span></span>
       </div>
       <div id="rader-lista">
-        ${rader.map((r, i) => radHTML(r, i, false)).join('')}
+        ${rader.map((r, i) => radHTML(r, i)).join('')}
       </div>
-
-      ${!godkand ? `<button class="btn-lagg-till" onclick="läggTillRad()">+ Lägg till moment</button>` : ''}
 
       <div class="totalt-rad">
         <span class="totalt-label">Totalt</span>
@@ -426,7 +420,7 @@
             <p>Tack! Vi hör av oss för att komma igång.</p>
           </div>`
         : `<div class="godkann-sektion">
-            <p>Bocka av de moment du vill ha med, lägg till egna om du vill, och godkänn sedan nedan.</p>
+            <p>Justera antal på de moment du vill ha med och godkänn sedan nedan.</p>
             <button class="btn-godkann" onclick="godkann()">Godkänn offert</button>
           </div>`
       }
@@ -435,68 +429,44 @@
     uppdateraTotalt();
   }
 
-  function radHTML(r, i, nyRad) {
+  // basRader sparar ursprungspriset per rad
+  const basBelopp = {};
+
+  function radHTML(r, i) {
+    basBelopp[i] = r.belopp;
     const fmt = new Intl.NumberFormat('sv-SE').format(r.belopp);
     return `
-      <div class="rad${nyRad ? ' ny' : ''}" id="rad-${i}">
-        <input type="checkbox" class="rad-checkbox" checked onchange="uppdateraTotalt()" />
+      <div class="rad" id="rad-${i}" data-bas="${r.belopp}" data-antal="1">
         <span class="rad-beskrivning">${r.beskrivning}</span>
-        <span class="rad-belopp">${fmt} kr</span>
-        <button class="rad-ta-bort" onclick="taBortRad(${i})" title="Ta bort">×</button>
+        <div class="rad-antal">
+          <button class="rad-antal-knapp" onclick="ändraAntal(${i}, -1)" id="minus-${i}">−</button>
+          <span class="rad-antal-nummer" id="antal-${i}">1</span>
+          <button class="rad-antal-knapp" onclick="ändraAntal(${i}, 1)">+</button>
+        </div>
+        <span class="rad-belopp" id="belopp-${i}">${fmt} kr</span>
       </div>`;
   }
 
-  let extraRader = [];
-
-  function läggTillRad() {
-    const lista = document.getElementById('rader-lista');
-    const i = lista.children.length;
-    const div = document.createElement('div');
-    div.innerHTML = `
-      <div class="ny-rad-form" id="ny-form-${i}">
-        <input type="text" placeholder="Beskriv momentet" id="ny-beskr-${i}" />
-        <input type="number" placeholder="Belopp" id="ny-belopp-${i}" />
-      </div>
-      <div style="display:flex;gap:8px;margin-top:6px;margin-bottom:8px;">
-        <button class="btn-godkann" style="padding:7px 20px;font-size:0.82rem;" onclick="bekräftaNyRad(${i})">Lägg till</button>
-        <button class="btn-lagg-till" style="width:auto;margin:0;" onclick="this.closest('div').previousSibling.remove();this.closest('div').remove()">Avbryt</button>
-      </div>`;
-    lista.appendChild(div);
-  }
-
-  function bekräftaNyRad(i) {
-    const beskr = document.getElementById(`ny-beskr-${i}`).value.trim();
-    const belopp = Number(document.getElementById(`ny-belopp-${i}`).value) || 0;
-    if (!beskr) return;
-    const lista = document.getElementById('rader-lista');
-    const formContainer = document.getElementById(`ny-form-${i}`).parentElement;
-    const nyIndex = lista.querySelectorAll('.rad').length;
-    const radDiv = document.createElement('div');
-    radDiv.innerHTML = radHTML({ beskrivning: beskr, belopp }, nyIndex, true);
-    lista.insertBefore(radDiv.firstElementChild, formContainer);
-    formContainer.remove();
+  function ändraAntal(i, delta) {
+    const rad = document.getElementById(`rad-${i}`);
+    let antal = parseInt(rad.dataset.antal) + delta;
+    if (antal < 0) antal = 0;
+    rad.dataset.antal = antal;
+    document.getElementById(`antal-${i}`).textContent = antal;
+    const bas = parseInt(rad.dataset.bas) || 0;
+    const belopp = bas * antal;
+    document.getElementById(`belopp-${i}`).textContent = new Intl.NumberFormat('sv-SE').format(belopp) + ' kr';
+    rad.style.opacity = antal === 0 ? '0.3' : '1';
+    document.getElementById(`minus-${i}`).disabled = antal === 0;
     uppdateraTotalt();
   }
 
-  function taBortRad(i) {
-    const rad = document.getElementById(`rad-${i}`);
-    if (rad) { rad.remove(); uppdateraTotalt(); }
-  }
-
   function uppdateraTotalt() {
-    const rader = document.querySelectorAll('#rader-lista .rad');
     let totalt = 0;
-    rader.forEach(rad => {
-      const checkbox = rad.querySelector('.rad-checkbox');
-      const beloppEl = rad.querySelector('.rad-belopp');
-      if (checkbox && beloppEl) {
-        const checked = checkbox.checked;
-        rad.classList.toggle('inaktiv', !checked);
-        if (checked) {
-          const belopp = parseInt(beloppEl.textContent.replace(/\s/g, '').replace('kr', '')) || 0;
-          totalt += belopp;
-        }
-      }
+    document.querySelectorAll('#rader-lista .rad').forEach(rad => {
+      const antal = parseInt(rad.dataset.antal) || 0;
+      const bas = parseInt(rad.dataset.bas) || 0;
+      totalt += antal * bas;
     });
     const el = document.getElementById('totalt-belopp');
     if (el) el.textContent = new Intl.NumberFormat('sv-SE').format(totalt) + ' kr';
@@ -505,12 +475,11 @@
   function läsAvJusteradeRader() {
     const rader = [];
     document.querySelectorAll('#rader-lista .rad').forEach(rad => {
-      const checkbox = rad.querySelector('.rad-checkbox');
-      if (!checkbox || !checkbox.checked) return;
+      const antal = parseInt(rad.dataset.antal) || 0;
+      if (antal === 0) return;
       const beskr = rad.querySelector('.rad-beskrivning')?.textContent.trim();
-      const beloppText = rad.querySelector('.rad-belopp')?.textContent || '0';
-      const belopp = parseInt(beloppText.replace(/\s/g, '').replace('kr', '')) || 0;
-      if (beskr) rader.push({ beskrivning: beskr, belopp });
+      const bas = parseInt(rad.dataset.bas) || 0;
+      if (beskr) rader.push({ beskrivning: antal > 1 ? `${beskr} (×${antal})` : beskr, belopp: bas * antal });
     });
     return rader;
   }
